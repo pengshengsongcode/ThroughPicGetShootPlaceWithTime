@@ -107,10 +107,16 @@
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations
 {
-
-    [locationmanager stopUpdatingLocation];
+    
+    //防止多次调用
     
     CLLocation *currentLocation = [locations lastObject];
+    
+    NSTimeInterval locationAge = -[currentLocation.timestamp timeIntervalSinceNow];
+    
+    if (locationAge > 5.0) return;
+    
+    if (currentLocation.horizontalAccuracy < 0) return;
     
     //打印当前的经度与纬度
     
@@ -140,6 +146,8 @@
         weakSelf.location.text = locationFormat;
         
     }];
+    
+    [locationmanager stopUpdatingLocation];
 
 }
 
