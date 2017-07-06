@@ -21,14 +21,9 @@
 @interface ViewController ()
 <UINavigationControllerDelegate, UIImagePickerControllerDelegate, CLLocationManagerDelegate>
 
-{
-    CLLocationManager *locationmanager;//定位服务
-    NSString *currentCity;//当前城市
-    NSString *strlatitude;//经度
-    NSString *strlongitude;//纬度
-}
-
 @property (nonatomic, strong) UIImagePickerController *imagePickerVC;
+
+@property (nonatomic, strong) CLLocationManager *locationmanager;//拍照定位
 
 @property (nonatomic, strong) CLLocationManager *locationManager;
 
@@ -79,35 +74,26 @@
 {
     //判断定位功能是否打开
     if ([CLLocationManager locationServicesEnabled]) {
-        locationmanager = [[CLLocationManager alloc]init];
-        locationmanager.delegate = self;
-        [locationmanager requestAlwaysAuthorization];
-        currentCity = [NSString new];
-        [locationmanager requestWhenInUseAuthorization];
+        self.locationmanager = [[CLLocationManager alloc]init];
+        self.locationmanager.delegate = self;
+        [self.locationmanager requestAlwaysAuthorization];
+        
+        [self.locationmanager requestWhenInUseAuthorization];
         
         //设置寻址精度
-        locationmanager.desiredAccuracy = kCLLocationAccuracyBest;
-        locationmanager.distanceFilter = 5.0;
-        [locationmanager startUpdatingLocation];
+        self.locationmanager.desiredAccuracy = kCLLocationAccuracyBest;
+        self.locationmanager.distanceFilter = 5.0;
+        [self.locationmanager startUpdatingLocation];
     }
 }
 
 //定位失败后调用此代理方法
 -(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
-{
-    //设置提示提醒用户打开定位服务
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"允许定位提示" message:@"请在设置中打开定位" preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"打开定位" style:UIAlertActionStyleDefault handler:nil];
-    
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
-    [alert addAction:okAction];
-    [alert addAction:cancelAction];
-    [self presentViewController:alert animated:YES completion:nil];
-}
+{}
 
+//获取一次定位，然后关掉manager
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations
 {
-    
     //防止多次调用
     
     CLLocation *currentLocation = [locations lastObject];
@@ -118,8 +104,7 @@
     
     if (currentLocation.horizontalAccuracy < 0) return;
     
-    //打印当前的经度与纬度
-    
+    //当前经纬度
     self.jingdu.text = [NSString stringWithFormat:@"%f", currentLocation.coordinate.longitude];
     self.weidu.text = [NSString stringWithFormat:@"%f", currentLocation.coordinate.latitude];
     
@@ -129,9 +114,8 @@
     
     __weak typeof(self)weakSelf = self;
     
+    //反向地理编码的请求 -> 根据经纬度 获取 位置
     [clGeoCoder reverseGeocodeLocation:newLocation completionHandler: ^(NSArray *placemarks,NSError *error) {
-        
-        NSString *locationFormat = @"";
         
         for (CLPlacemark *placeMark in placemarks)
         {
@@ -139,15 +123,11 @@
             
             NSArray *location_Arr = [addressDic objectForKey:@"FormattedAddressLines"];//系统格式化后的位置
             
-            locationFormat = [location_Arr firstObject];
-            
+            weakSelf.location.text = [location_Arr firstObject];
         }
-        
-        weakSelf.location.text = locationFormat;
-        
     }];
     
-    [locationmanager stopUpdatingLocation];
+    [self.locationmanager stopUpdatingLocation];
 
 }
 
@@ -157,7 +137,7 @@
     
     //[Generic] Creating an image format with an unknown type is an error
     
-    UIImage * image = [info objectForKey:UIImagePickerControllerEditedImage];
+    UIImage * image = [info objectForKey:UIImagePickerControllerOriginalImage];
     
     self.imageView.image = image;
     
@@ -185,7 +165,6 @@
             NSLog(@"请开启定位功能！");
         }
         
-        
     } else if(picker.sourceType == UIImagePickerControllerSourceTypePhotoLibrary){//相册
         
         NSURL *assetURL = [info objectForKey:UIImagePickerControllerReferenceURL];
@@ -194,57 +173,56 @@
         
         __block NSMutableDictionary *imageMetadata_GPS = nil;
         
-        [library assetForURL:assetURL
-                 resultBlock:^(ALAsset *asset)  {
-                     
-                     //获取时间
-                     NSDate* pictureDate = [asset valueForProperty:ALAssetPropertyDate];
-                     NSDateFormatter * formatter = [[NSDateFormatter alloc]init];
-                     formatter.dateFormat = @"yyyy:MM:dd HH:mm:ss";
-                     formatter.timeZone = [NSTimeZone localTimeZone];
-                     NSString * pictureTime = [formatter stringFromDate:pictureDate];
-                     self.time.text = pictureTime;
-                     
-                     //获取GPS
-                     imageMetadata_GPS = [[NSMutableDictionary alloc] initWithDictionary:asset.defaultRepresentation.metadata];
-                     
-                     NSDictionary *GPSDict=[imageMetadata_GPS objectForKey:(NSString*)kCGImagePropertyGPSDictionary];
-                     
-                     if (GPSDict!=nil) {
+        __weak typeof(self)weakSelf = self;
+        
+        [library assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+            
+             //获取时间
+             NSDate* pictureDate = [asset valueForProperty:ALAssetPropertyDate];
+             NSDateFormatter * formatter = [[NSDateFormatter alloc]init];
+             formatter.dateFormat = @"yyyy:MM:dd HH:mm:ss";
+             formatter.timeZone = [NSTimeZone localTimeZone];
+             NSString * pictureTime = [formatter stringFromDate:pictureDate];
+             weakSelf.time.text = pictureTime;
+             
+             //获取GPS
+             imageMetadata_GPS = [[NSMutableDictionary alloc] initWithDictionary:asset.defaultRepresentation.metadata];
+             
+             NSDictionary *GPSDict=[imageMetadata_GPS objectForKey:(NSString*)kCGImagePropertyGPSDictionary];
+             
+             if (GPSDict!=nil) {
+                 
+                 CLLocation *loc=[GPSDict locationFromGPSDictionary];
+                 
+                 weakSelf.weidu.text = [NSString stringWithFormat:@"%f", loc.coordinate.latitude];
+                 weakSelf.jingdu.text = [NSString stringWithFormat:@"%f", loc.coordinate.longitude];
+                 
+                 CLGeocoder *clGeoCoder = [[CLGeocoder alloc] init];
+                 
+                 CLLocation *newLocation = [[CLLocation alloc] initWithLatitude:loc.coordinate.latitude longitude:loc.coordinate.longitude];
+                 
+                 //反向地理编码的请求 -> 根据经纬度 获取 位置
+                 [clGeoCoder reverseGeocodeLocation:newLocation completionHandler: ^(NSArray *placemarks,NSError *error) {
+                     for (CLPlacemark *placeMark in placemarks)
+                     {
+                         NSDictionary *addressDic=placeMark.addressDictionary;
                          
-                         CLLocation *loc=[GPSDict locationFromGPSDictionary];
+                         NSArray *location_Arr = [addressDic objectForKey:@"FormattedAddressLines"];//系统格式化后的位置
                          
-                         self.weidu.text = [NSString stringWithFormat:@"%f", loc.coordinate.latitude];
-                         self.jingdu.text = [NSString stringWithFormat:@"%f", loc.coordinate.longitude];
+                         weakSelf.location.text = [location_Arr firstObject];
                          
-                         CLGeocoder *clGeoCoder = [[CLGeocoder alloc] init];
-                         
-                         CLLocation *newLocation = [[CLLocation alloc] initWithLatitude:loc.coordinate.latitude longitude:loc.coordinate.longitude];
-                         
-                         __weak typeof(self)weakSelf = self;
-                         
-                         [clGeoCoder reverseGeocodeLocation:newLocation completionHandler: ^(NSArray *placemarks,NSError *error) {
-                             for (CLPlacemark *placeMark in placemarks)
-                             {
-                                 NSDictionary *addressDic=placeMark.addressDictionary;
-                                 
-                                 NSArray *location_Arr = [addressDic objectForKey:@"FormattedAddressLines"];//系统格式化后的位置
-                                 
-                                 weakSelf.location.text = [location_Arr firstObject];
-                                 
-                             }
-                         }];
+                     }
+                 }];
 
-                     }
-                     else{
-                         self.weidu.text = @"此照片没有GPS信息";
-                         self.jingdu.text = @"此照片没有GPS信息";
-                         self.location.text = @"此照片没有拍摄位置";
-                     }
-                     
+             }else{
+                     weakSelf.weidu.text = @"此照片没有GPS信息";
+                     weakSelf.jingdu.text = @"此照片没有GPS信息";
+                     weakSelf.location.text = @"此照片没有拍摄位置";
                  }
-         
-                failureBlock:^(NSError *error) {
+                 
+             }
+     
+            failureBlock:^(NSError *error) {
         }];
     }
     
@@ -271,7 +249,7 @@
         // 设置代理，遵守UINavigationControllerDelegate, UIImagePickerControllerDelegate 协议
         _imagePickerVC.delegate = self;
         // 是否允许编辑（YES：图片选择完成进入编辑模式）
-        _imagePickerVC.allowsEditing = YES;
+//        _imagePickerVC.allowsEditing = YES;
         
     }
     return _imagePickerVC;
