@@ -4,7 +4,8 @@
 //
 //  Created by 彭盛凇 on 2017/7/6.
 //  Copyright © 2017年 huangbaoche. All rights reserved.
-//
+//  简单来说  拍照获取照片，当前时间 和 当前位置
+//          相册获取照片，ALAssetsLibrary来获取拍摄时间和拍摄地点
 
 #import "ViewController.h"
 
