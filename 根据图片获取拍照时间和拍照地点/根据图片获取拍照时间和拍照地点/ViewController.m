@@ -24,9 +24,7 @@
 
 @property (nonatomic, strong) UIImagePickerController *imagePickerVC;
 
-@property (nonatomic, strong) CLLocationManager *locationmanager;//拍照定位
-
-@property (nonatomic, strong) CLLocationManager *locationManager;
+@property (nonatomic, strong) CLLocationManager *locationManager;//拍照定位
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UILabel *time;
@@ -43,16 +41,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.locationManager = [[CLLocationManager alloc] init];
-    
-    self.locationManager.delegate = self;
-    
-    self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-    
-    self.locationManager.distanceFilter = 1000.0f;
-    
     // Do any additional setup after loading the view, typically from a nib.
 }
+
 
 - (IBAction)doAction_1:(id)sender {//拍照
     
@@ -75,16 +66,16 @@
 {
     //判断定位功能是否打开
     if ([CLLocationManager locationServicesEnabled]) {
-        self.locationmanager = [[CLLocationManager alloc]init];
-        self.locationmanager.delegate = self;
-        [self.locationmanager requestAlwaysAuthorization];
+        self.locationManager = [[CLLocationManager alloc]init];
+        self.locationManager.delegate = self;
+        [self.locationManager requestAlwaysAuthorization];
         
-        [self.locationmanager requestWhenInUseAuthorization];
+        [self.locationManager requestWhenInUseAuthorization];
         
         //设置寻址精度
-        self.locationmanager.desiredAccuracy = kCLLocationAccuracyBest;
-        self.locationmanager.distanceFilter = 5.0;
-        [self.locationmanager startUpdatingLocation];
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+        self.locationManager.distanceFilter = 5.0;
+        [self.locationManager startUpdatingLocation];
     }
 }
 
@@ -128,7 +119,7 @@
         }
     }];
     
-    [self.locationmanager stopUpdatingLocation];
+    [self.locationManager stopUpdatingLocation];
 
 }
 
@@ -255,4 +246,16 @@
     }
     return _imagePickerVC;
 }
+
+
+-(CLLocationManager *)locationManager {
+    if (!_locationManager) {
+        _locationManager = [[CLLocationManager alloc] init];
+        _locationManager.delegate = self;
+        _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+        _locationManager.distanceFilter = 1000.0f;
+    }
+    return _locationManager;
+}
+
 @end
