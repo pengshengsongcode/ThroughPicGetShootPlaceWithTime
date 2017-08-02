@@ -19,6 +19,8 @@
 
 #import "NSDictionary+CLLocation.h"
 
+#import "WGS84TOGCJ02.h"
+
 @interface ViewController ()
 <UINavigationControllerDelegate, UIImagePickerControllerDelegate, CLLocationManagerDelegate>
 
@@ -90,19 +92,27 @@
     
     CLLocation *currentLocation = [locations lastObject];
     
+    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(currentLocation.coordinate.latitude, currentLocation.coordinate.longitude);
+    
     NSTimeInterval locationAge = -[currentLocation.timestamp timeIntervalSinceNow];
     
     if (locationAge > 5.0) return;
     
     if (currentLocation.horizontalAccuracy < 0) return;
     
+    //判断是不是属于国内范围
+    if (![WGS84TOGCJ02 isLocationOutOfChina:[currentLocation coordinate]]) {
+        //转换后的coord
+        coord = [WGS84TOGCJ02 transformFromWGSToGCJ:[currentLocation coordinate]];
+    }
+
     //当前经纬度
-    self.jingdu.text = [NSString stringWithFormat:@"%f", currentLocation.coordinate.longitude];
-    self.weidu.text = [NSString stringWithFormat:@"%f", currentLocation.coordinate.latitude];
+    self.jingdu.text = [NSString stringWithFormat:@"%f", coord.longitude];
+    self.weidu.text = [NSString stringWithFormat:@"%f", coord.latitude];
     
     CLGeocoder *clGeoCoder = [[CLGeocoder alloc] init];
     
-    CLLocation *newLocation = [[CLLocation alloc] initWithLatitude:currentLocation.coordinate.latitude longitude:currentLocation.coordinate.longitude];
+    CLLocation *newLocation = [[CLLocation alloc] initWithLatitude:coord.latitude longitude:coord.longitude];
     
     __weak typeof(self)weakSelf = self;
     

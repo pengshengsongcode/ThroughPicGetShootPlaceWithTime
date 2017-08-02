@@ -15,6 +15,7 @@
 		8020B91A1F0DD690009DFEC8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8020B9181F0DD690009DFEC8 /* LaunchScreen.storyboard */; };
 		8020B9261F0DE2FE009DFEC8 /* NSDictionary+CLLocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8020B9241F0DE2FE009DFEC8 /* NSDictionary+CLLocation.m */; };
 		8020B9291F0E0906009DFEC8 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8020B9281F0E0905009DFEC8 /* CoreLocation.framework */; };
+		802FD26D1F31BB0C0001E16B /* WGS84TOGCJ02.m in Sources */ = {isa = PBXBuildFile; fileRef = 802FD26C1F31BB0C0001E16B /* WGS84TOGCJ02.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,8 @@
 		8020B9231F0DE2FE009DFEC8 /* NSDictionary+CLLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+CLLocation.h"; sourceTree = "<group>"; };
 		8020B9241F0DE2FE009DFEC8 /* NSDictionary+CLLocation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+CLLocation.m"; sourceTree = "<group>"; };
 		8020B9281F0E0905009DFEC8 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		802FD26B1F31BB0C0001E16B /* WGS84TOGCJ02.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WGS84TOGCJ02.h; sourceTree = "<group>"; };
+		802FD26C1F31BB0C0001E16B /* WGS84TOGCJ02.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WGS84TOGCJ02.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +74,8 @@
 				8020B90E1F0DD690009DFEC8 /* AppDelegate.m */,
 				8020B9101F0DD690009DFEC8 /* ViewController.h */,
 				8020B9111F0DD690009DFEC8 /* ViewController.m */,
+				802FD26B1F31BB0C0001E16B /* WGS84TOGCJ02.h */,
+				802FD26C1F31BB0C0001E16B /* WGS84TOGCJ02.m */,
 				8020B9131F0DD690009DFEC8 /* Main.storyboard */,
 				8020B9161F0DD690009DFEC8 /* Assets.xcassets */,
 				8020B9181F0DD690009DFEC8 /* LaunchScreen.storyboard */,
@@ -169,6 +174,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8020B9121F0DD690009DFEC8 /* ViewController.m in Sources */,
+				802FD26D1F31BB0C0001E16B /* WGS84TOGCJ02.m in Sources */,
 				8020B9261F0DE2FE009DFEC8 /* NSDictionary+CLLocation.m in Sources */,
 				8020B90F1F0DD690009DFEC8 /* AppDelegate.m in Sources */,
 				8020B90C1F0DD690009DFEC8 /* main.m in Sources */,
@@ -334,6 +340,7 @@
 				8020B9201F0DD690009DFEC8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
